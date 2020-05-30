@@ -53,6 +53,20 @@ export class AppComponent {
         this.fileState = FileState.LOADED;
       } else {
         this.indexedLines.push(...data);
+
+        /*
+        Pre allocating array size should (apparently) be a huge performance boost
+        But since I couldn't see any difference I chose the simplest code
+
+        Source: https://dev.to/uilicious/javascript-array-push-is-945x-faster-than-array-concat-1oki
+        */
+
+        // const prevLength = this.indexedLines.length;
+        // this.indexedLines.length += data.length;
+
+        // for (let i = 0; i < data.length; i++){
+        //   this.indexedLines[prevLength + i] = data[i];
+        // }
       }
 
       this.cd.detectChanges();
