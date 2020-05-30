@@ -7,13 +7,13 @@
     class="progress"
     color="primary"
     mode="determinate"
-    [value]="(indexedLines.length / 6844030) * 100"
+    [value]="(indexedLines.length / nbTotalLines) * 100"
   ></mat-progress-bar>
 </mat-toolbar>
 
 <div class="content">
   <form class="search" [formGroup]="searchForm" (ngSubmit)="onSubmit(searchForm.value)">
-    <mat-form-field class="search-field">
+    <mat-form-field class="search-field" appearance="outline">
       <mat-label>Title</mat-label>
       <input
         matInput
@@ -23,12 +23,12 @@
       >
     </mat-form-field>
 
-    <mat-form-field class="search-field">
+    <mat-form-field class="search-field" appearance="outline">
       <mat-label>Year</mat-label>
       <input
         matInput
-        formControlName="year"
         type="number"
+        formControlName="year"
         pattern="\d{4}"
         placeholder="eg. 1894"
       >
@@ -57,41 +57,47 @@
       </mat-error>
     </p>
 
-    <ng-container *ngIf="filteredLines.length > 0">
-      <h3>Results</h3>
+    <h3>Results</h3>
 
-      <table mat-table [dataSource]="filteredLines" class="mat-elevation-z8">
+    <table mat-table [dataSource]="filteredLines" class="mat-elevation-z8">
+      <ng-container matColumnDef="primaryTitle">
+        <th mat-header-cell *matHeaderCellDef> PrimaryTitle </th>
+        <td mat-cell *matCellDef="let line"> {{ line[0] }} </td>
+      </ng-container>
 
-        <ng-container matColumnDef="primaryTitle">
-          <th mat-header-cell *matHeaderCellDef> PrimaryTitle </th>
-          <td mat-cell *matCellDef="let line"> {{ line[0] }} </td>
-        </ng-container>
+      <ng-container matColumnDef="originalTitle">
+        <th mat-header-cell *matHeaderCellDef> OriginalTitle </th>
+        <td mat-cell *matCellDef="let line"> {{ line[1] }} </td>
+      </ng-container>
 
-        <ng-container matColumnDef="originalTitle">
-          <th mat-header-cell *matHeaderCellDef> OriginalTitle </th>
-          <td mat-cell *matCellDef="let line"> {{ line[1] }} </td>
-        </ng-container>
+      <ng-container matColumnDef="year">
+        <th mat-header-cell *matHeaderCellDef> Year </th>
+        <td mat-cell *matCellDef="let line"> {{ line[2] }} </td>
+      </ng-container>
 
-        <ng-container matColumnDef="year">
-          <th mat-header-cell *matHeaderCellDef> Year </th>
-          <td mat-cell *matCellDef="let line"> {{ line[2]}} </td>
-        </ng-container>
+      <ng-container matColumnDef="genre">
+        <th mat-header-cell *matHeaderCellDef> Genre </th>
+        <td mat-cell *matCellDef="let line">
+           <mat-chip-list>
+            <mat-chip *ngFor="let genre of line[3]">{{ genre }}</mat-chip>
+          </mat-chip-list>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="genre">
-          <th mat-header-cell *matHeaderCellDef> Genre </th>
-          <td mat-cell *matCellDef="let line"> {{ line[3] }} </td>
-        </ng-container>
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let line">
+          <button mat-raised-button color="primary">Edit</button>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="action">
-          <th mat-header-cell *matHeaderCellDef> Action </th>
-          <td mat-cell>
-            <button mat-raised-button color="accent">Edit</button>
-          </td>
-        </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </ng-container>
+    <mat-paginator
+      [pageSizeOptions]="[10, 20, 50]"
+      showFirstLastButtons
+    ></mat-paginator>
   </div>
 </div>

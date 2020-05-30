@@ -1,15 +1,12 @@
 /// <reference lib="webworker" />
 
-// addEventListener('message', ({ data }) => {
-//   const response = `worker response to ${data}`;
-//   postMessage(response);
-// });
+import { Genres, Line, OriginalTitle, PrimaryTitle, Year } from 'src/app/line.type';
 
 let reader: ReadableStreamDefaultReader<Uint8Array>;
-let indexedLines = [];
+let indexedLines: Line[] = [];
 let chunkRest: string = null;
 
-console.time('indexing');
+console.time('Time to index');
 
 fetch('./assets/large-file.tsv').then(response => {
   if (response.ok) {
@@ -22,7 +19,7 @@ fetch('./assets/large-file.tsv').then(response => {
 
 function processText({ done, value }): Promise<void> {
   if (done) {
-    console.timeEnd('indexing');
+    console.timeEnd('Time to index');
     postMessage('index-done');
     return Promise.resolve();
   }
@@ -66,10 +63,10 @@ function parseLine(chunkLine, retry = true): void {
 }
 
 function indexLine(line: string[], lineIndex: number): void {
-  const primaryTitle = line[2];
-  const originalTitle = line[3];
-  const year = parseInt(line[5], 10);
-  const genre = line[8];
+  const primaryTitle: PrimaryTitle = line[2];
+  const originalTitle: OriginalTitle = line[3];
+  const year: Year = parseInt(line[5], 10);
+  const genres: Genres = line[8].split(',');
 
   // indexedLinesByYear[year] = [
   //   ...(indexedLinesByYear[year] || []),
@@ -85,5 +82,5 @@ function indexLine(line: string[], lineIndex: number): void {
     }
   */
 
-  indexedLines.push([ primaryTitle, originalTitle, year, genre ]);
+  indexedLines.push([ primaryTitle, originalTitle, year, genres ]);
 }

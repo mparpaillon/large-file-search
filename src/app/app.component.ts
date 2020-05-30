@@ -1,17 +1,14 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import { Line } from 'src/app/line.type';
 
 enum FileState {
   LOADING,
   LOADED,
   NOT_FOUND
 }
-
-// Declaring some type aliases to make it more readable
-type PrimaryTitle = string;
-type OriginalTitle = string;
-type Year = number;
-type Genre = string;
 
 @Component({
   selector: 'app-root',
@@ -22,11 +19,13 @@ export class AppComponent {
   searchForm: FormGroup;
   FileState = FileState;
   fileState: FileState = FileState.LOADING;
-  filteredLines: Array<[ PrimaryTitle, OriginalTitle, Year, Genre ]> = [];
-  indexedLines: Array<[ PrimaryTitle, OriginalTitle, Year, Genre ]> = [];
-  indexedLinesByYear: { [ year: number ]: number[] } = {};
+  indexedLines: Line[] = [];
   displayedColumns = [ 'primaryTitle', 'originalTitle', 'year', 'genre', 'action' ];
   webWorkerSupported = typeof Worker !== 'undefined';
+  nbTotalLines = 6844030;
+  filteredLines = new MatTableDataSource<Line>();
+
+  @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -67,14 +66,17 @@ export class AppComponent {
         // for (let i = 0; i < data.length; i++){
         //   this.indexedLines[prevLength + i] = data[i];
         // }
+
+        this.filteredLines.data = this.indexedLines;
+        this.filteredLines.paginator = this.paginator;
       }
 
       this.cd.detectChanges();
     };
-    // worker.postMessage('hello');
   }
 
   onSubmit(searchData: { title: string, year: number }): void {
     console.log(searchData);
   }
 }
+
