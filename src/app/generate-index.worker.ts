@@ -5,9 +5,9 @@
 //   postMessage(response);
 // });
 
-let reader;
+let reader: ReadableStreamDefaultReader<Uint8Array>;
 let indexedLines = [];
-let chunkRest: string;
+let chunkRest: string = null;
 
 console.time('indexing');
 

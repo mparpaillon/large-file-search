@@ -22,8 +22,6 @@ export class AppComponent {
   searchForm: FormGroup;
   FileState = FileState;
   fileState: FileState = FileState.LOADING;
-  reader: ReadableStreamDefaultReader<Uint8Array>;
-  chunkRest: string = null;
   filteredLines: Array<[ PrimaryTitle, OriginalTitle, Year, Genre ]> = [];
   indexedLines: Array<[ PrimaryTitle, OriginalTitle, Year, Genre ]> = [];
   indexedLinesByYear: { [ year: number ]: number[] } = {};
@@ -46,6 +44,7 @@ export class AppComponent {
     if (!this.webWorkerSupported) {
       return;
     }
+
     const worker = new Worker('./generate-index.worker', { type: 'module' });
     worker.onmessage = ({ data }) => {
       if (data === 'file-not-found') {
