@@ -1,8 +1,23 @@
+.header {
+  position: relative;
+}
+
 .content {
   padding: 20px;
+}
+
+.progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .search-field + .search-field,
 .search-field + .search-button {
   margin-left: 15px;
+}
+
+.mat-table {
+  width: 100%;
 }

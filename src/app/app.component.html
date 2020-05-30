@@ -1,5 +1,14 @@
-<mat-toolbar color="primary">
-  <span>Canal search</span>
+<mat-toolbar color="primary" class="header">
+  <span>
+    Canal search - Indexed lines: {{ indexedLines.length }}
+  </span>
+
+  <mat-progress-bar
+    class="progress"
+    color="accent"
+    mode="determinate"
+    [value]="(indexedLines.length / 6844030) * 100"
+  ></mat-progress-bar>
 </mat-toolbar>
 
 <div class="content">
@@ -38,9 +47,49 @@
   <div class="result">
     <h3>Results</h3>
 
-    File state: {{ fileState }}
-    <p>
-      No result for now. Search for a movie to see the results...
+    <p *ngIf="fileState == FileState.NOT_FOUND">
+      <mat-error>
+        The data file was not found<br />
+        For this app to work, you need to add the <strong>large-file.tsv</strong> file in the <strong>assets</strong> folder.
+      </mat-error>
     </p>
+
+    <p *ngIf="fileState == FileState.LOADED && filteredLines.length === 0">
+      No result for now.
+    </p>
+
+    <table mat-table [dataSource]="filteredLines" class="mat-elevation-z8" *ngIf="filteredLines.length > 0">
+
+      <ng-container matColumnDef="primaryTitle">
+        <th mat-header-cell *matHeaderCellDef> PrimaryTitle </th>
+        <td mat-cell *matCellDef="let line"> {{ line[0] }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="originalTitle">
+        <th mat-header-cell *matHeaderCellDef> OriginalTitle </th>
+        <td mat-cell *matCellDef="let line"> {{ line[1] }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="year">
+        <th mat-header-cell *matHeaderCellDef> Year </th>
+        <td mat-cell *matCellDef="let line"> {{ line[2]}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="genre">
+        <th mat-header-cell *matHeaderCellDef> Genre </th>
+        <td mat-cell *matCellDef="let line"> {{ line[3] }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell>
+          <button mat-raised-button color="accent">Edit</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
   </div>
 </div>

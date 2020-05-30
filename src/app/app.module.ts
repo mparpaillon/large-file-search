@@ -3,6 +3,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -19,6 +21,8 @@ import { AppComponent } from './app.component';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatProgressBarModule,
+    MatTableModule,
     MatToolbarModule
   ],
   providers: [
