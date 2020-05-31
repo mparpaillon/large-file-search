@@ -13,6 +13,12 @@
   right: 0;
 }
 
+.search {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .search-field + .search-field,
 .search-field + .search-button {
   margin-left: 15px;
@@ -30,4 +36,10 @@
 .mat-column-year {
   width: 100px;
   text-align: center;
+}
+
+.search-field {
+  ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0 !important;
+  }
 }

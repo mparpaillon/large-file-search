@@ -75,8 +75,25 @@ export class AppComponent {
     };
   }
 
+  resetSearch() {
+    this.searchForm.reset();
+  }
+
   onSubmit(searchData: { title: string, year: number }): void {
-    console.log(searchData);
+    const filteredLines = this.indexedLines.filter(line => {
+      if (searchData.title && !line[0].includes(searchData.title) && !line[1].includes(searchData.title)) {
+        return false;
+      }
+
+      if (searchData.year && line[2] !== searchData.year) {
+        return false;
+      }
+
+      return true;
+    });
+
+    this.filteredLines.data = filteredLines;
+    this.filteredLines.paginator = this.paginator;
   }
 }
 
