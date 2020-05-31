@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -15,15 +15,15 @@ enum FileState {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   searchForm: FormGroup;
   FileState = FileState;
   fileState: FileState = FileState.LOADING;
   indexedLines: Line[] = [];
-  displayedColumns = [ 'primaryTitle', 'originalTitle', 'year', 'genre', 'action' ];
+  displayedColumns = [ 'originalTitle', 'year', 'genre', 'action' ];
   webWorkerSupported = typeof Worker !== 'undefined';
-  nbTotalLines = 6844030;
   filteredLines = new MatTableDataSource<Line>();
+  timeToIndex: number;
 
   @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
 
@@ -39,6 +39,11 @@ export class AppComponent {
     this.generateIndex();
   }
 
+  ngOnInit() {
+    this.filteredLines.data = [];
+    this.filteredLines.paginator = this.paginator;
+  }
+
   generateIndex(): void {
     if (!this.webWorkerSupported) {
       return;
@@ -48,27 +53,12 @@ export class AppComponent {
     worker.onmessage = ({ data }) => {
       if (data === 'file-not-found') {
         this.fileState = FileState.NOT_FOUND;
-      } else if (data === 'index-done') {
+      } else if (data.timeToIndex) {
         this.fileState = FileState.LOADED;
+        this.timeToIndex = Math.round(data.timeToIndex / 1000);
       } else {
-        this.indexedLines.push(...data);
-
-        /*
-        Pre allocating array size should (apparently) be a huge performance boost
-        But since I couldn't see any difference I chose the simplest code
-
-        Source: https://dev.to/uilicious/javascript-array-push-is-945x-faster-than-array-concat-1oki
-        */
-
-        // const prevLength = this.indexedLines.length;
-        // this.indexedLines.length += data.length;
-
-        // for (let i = 0; i < data.length; i++){
-        //   this.indexedLines[prevLength + i] = data[i];
-        // }
-
+        this.indexedLines.push(...data.indexedLines);
         this.filteredLines.data = this.indexedLines;
-        this.filteredLines.paginator = this.paginator;
       }
 
       this.cd.detectChanges();
@@ -79,21 +69,27 @@ export class AppComponent {
     this.searchForm.reset();
   }
 
-  onSubmit(searchData: { title: string, year: number }): void {
-    const filteredLines = this.indexedLines.filter(line => {
-      if (searchData.title && !line[0].includes(searchData.title) && !line[1].includes(searchData.title)) {
+  filterLines(lines: Line[], title: string, year: number): Line[] {
+    if (!title && !year) {
+      return lines;
+    }
+
+    return lines.filter(line => {
+      if (title && !line[0].includes(title) && !line[1].includes(title)) {
         return false;
       }
 
-      if (searchData.year && line[2] !== searchData.year) {
+      if (year && line[2] !== year) {
         return false;
       }
 
       return true;
     });
+  }
 
-    this.filteredLines.data = filteredLines;
-    this.filteredLines.paginator = this.paginator;
+  onSubmit(searchData: { title: string, year: number }): void {
+    const { title, year } = searchData;
+    this.filteredLines.data = this.filterLines(this.indexedLines, title, year);
   }
 }
 

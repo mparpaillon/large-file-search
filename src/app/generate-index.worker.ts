@@ -6,7 +6,7 @@ let reader: ReadableStreamDefaultReader<Uint8Array>;
 let indexedLines: Line[] = [];
 let chunkRest: string = null;
 
-console.time('Time to index');
+const timeStart = Date.now();
 
 fetch('./assets/large-file.tsv').then(response => {
   if (response.ok) {
@@ -19,15 +19,14 @@ fetch('./assets/large-file.tsv').then(response => {
 
 function processText({ done, value }): Promise<void> {
   if (done) {
-    console.timeEnd('Time to index');
-    postMessage('index-done');
+    postMessage({ timeToIndex: Date.now() - timeStart });
     return Promise.resolve();
   }
 
   const chunk = new TextDecoder('utf-8').decode(value);
   chunk.split('\n').forEach(chunkLine => parseLine(chunkLine, false));
 
-  postMessage(indexedLines);
+  postMessage({ indexedLines });
   indexedLines = [];
 
   return reader.read().then(processText);
@@ -67,20 +66,6 @@ function indexLine(line: string[], lineIndex: number): void {
   const originalTitle: OriginalTitle = line[3];
   const year: Year = parseInt(line[5], 10);
   const genres: Genres = line[8].split(',');
-
-  // indexedLinesByYear[year] = [
-  //   ...(indexedLinesByYear[year] || []),
-  //   lineIndex
-  // ];
-
-  // Could also be written like this (@todo Check perf diff)
-  /*
-    if (indexedLinesByYear[year]) {
-      indexedLinesByYear[year].push(lineIndex);
-    } else {
-      indexedLinesByYear[year] = [ lineIndex ];
-    }
-  */
 
   indexedLines.push([ primaryTitle, originalTitle, year, genres ]);
 }

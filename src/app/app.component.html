@@ -1,17 +1,17 @@
 <mat-toolbar color="primary" class="header">
-  <span>
-    Canal search - Indexed lines: {{ indexedLines.length }}
-  </span>
-
-  <mat-progress-bar
-    class="progress"
-    color="primary"
-    mode="determinate"
-    [value]="(indexedLines.length / nbTotalLines) * 100"
-  ></mat-progress-bar>
+  <div class="header-title">
+    Canal search
+    <div class="header-sub">
+      Indexed lines: {{ indexedLines.length }}<ng-container *ngIf="timeToIndex">, time to index: {{ timeToIndex }}s</ng-container>
+    </div>
+  </div>
 </mat-toolbar>
 
 <div class="content">
+  <mat-hint *ngIf="fileState !== FileState.LOADED" class="hint">
+    You'll be able to submit the form once all the data are indexed.
+  </mat-hint>
+
   <form class="search" [formGroup]="searchForm" (ngSubmit)="onSubmit(searchForm.value)">
     <mat-form-field class="search-field" appearance="outline">
       <mat-label>Title</mat-label>
@@ -19,7 +19,7 @@
         matInput
         type="text"
         formControlName="title"
-        placeholder="eg. Chinese Opium Den"
+        placeholder="Chinese Opium Den"
       >
     </mat-form-field>
 
@@ -30,7 +30,7 @@
         type="number"
         formControlName="year"
         pattern="\d{4}"
-        placeholder="eg. 1894"
+        placeholder="1894"
       >
     </mat-form-field>
 
@@ -38,6 +38,7 @@
       mat-raised-button
       class="search-button"
       type="submit"
+      [disabled]="fileState !== FileState.LOADED"
       color="primary"
     >
       Search
@@ -49,6 +50,7 @@
       type="submit"
       color="accent"
       (click)="resetSearch()"
+      [disabled]="fileState !== FileState.LOADED"
     >
       Reset
     </button>
@@ -69,19 +71,15 @@
 
     <h3>Results</h3>
 
-    <table mat-table [dataSource]="filteredLines" class="mat-elevation-z8">
-      <ng-container matColumnDef="primaryTitle">
-        <th mat-header-cell *matHeaderCellDef> PrimaryTitle </th>
-        <td mat-cell *matCellDef="let line"> {{ line[0] }} </td>
-      </ng-container>
 
+    <table mat-table [dataSource]="filteredLines" class="mat-elevation-z8">
       <ng-container matColumnDef="originalTitle">
-        <th mat-header-cell *matHeaderCellDef> OriginalTitle </th>
+        <th mat-header-cell *matHeaderCellDef> Original title </th>
         <td mat-cell *matCellDef="let line"> {{ line[1] }} </td>
       </ng-container>
 
       <ng-container matColumnDef="year">
-        <th mat-header-cell *matHeaderCellDef> Year </th>
+        <th mat-header-cell *matHeaderCellDef> Start year </th>
         <td mat-cell *matCellDef="let line"> {{ line[2] }} </td>
       </ng-container>
 
@@ -105,9 +103,6 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
 
-    <mat-paginator
-      [pageSizeOptions]="[10, 20, 50]"
-      showFirstLastButtons
-    ></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[10, 20, 50]"></mat-paginator>
   </div>
 </div>
