@@ -1,27 +1,34 @@
-# CanalTest
+# Large file search
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.7.
+## How to use
 
-## Development server
+Paste a big file in the assets folder and name it "large-file.tsv" (it's not versionned for obvious reasons).
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+To properly work, its structure should look like this:
 
-## Code scaffolding
+```
+tconst	titleType	primaryTitle	originalTitle	isAdult	startYear	endYear	runtimeMinutes	genres
+tt0000001	short	Carmencita	Carmencita	0	1894	\N	1	Documentary,Short
+tt0000002	short	Le clown et ses chiens	Le clown et ses chiens	0	1892	\N	5	Animation,Short
+tt0000003	short	Pauvre Pierrot	Pauvre Pierrot	0	1892	\N	4	Animation,Comedy,Romance
+tt0000004	short	Un bon bock	Un bon bock	0	1892	\N	12	Animation,Short
+tt0000005	short	Blacksmith Scene	Blacksmith Scene	0	1893	\N	1	Comedy,Short
+tt0000006	short	Chinese Opium Den	Chinese Opium Den	0	1894	\N	1	Short
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Source: https://datasets.imdbws.com/title.basics.tsv.gz
 
-## Build
+Then run it with `ng serve` or build it with `ng build`
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## How does it work
 
-## Running unit tests
+- Fetch + getReader to parse the file by chunks
+- Web Worker to avoid using the main thread and freezing the UI
+- UI done with Material design
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Ideas to improve
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+- Better UX to edit the genres (material chips + inline form)
+- Pre-format original data to remove unused data
+  - I could have done it but the exercise is more interesting with a huge file
+- It would be nice to be able to filter while indexing but with that much data it had really bad performance (further search should be able to improve this)
