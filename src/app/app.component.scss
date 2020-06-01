@@ -34,7 +34,8 @@
 }
 
 .search-field + .search-field,
-.search-field + .search-button {
+.search-field + .search-button,
+.search-button + .search-button {
   margin-left: 15px;
 }
 

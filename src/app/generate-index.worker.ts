@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { Genres, Line, OriginalTitle, PrimaryTitle, Year } from 'src/app/line.type';
+import { Line } from 'src/app/line.type';
 
 let reader: ReadableStreamDefaultReader<Uint8Array>;
 let indexedLines: Line[] = [];
@@ -42,8 +42,7 @@ function parseLine(chunkLine, retry = true): void {
 
   // If the line looks complete, we index it
   if (splitLine.length === 9) {
-    const lineIndex = indexedLines.length - 1;
-    return indexLine(splitLine, lineIndex);
+    return indexLine(splitLine);
   }
 
   // If we get here, we have an incomplete line, but let's give it a chance (only 1 retry)
@@ -61,11 +60,14 @@ function parseLine(chunkLine, retry = true): void {
   }
 }
 
-function indexLine(line: string[], lineIndex: number): void {
-  const primaryTitle: PrimaryTitle = line[2];
-  const originalTitle: OriginalTitle = line[3];
-  const year: Year = parseInt(line[5], 10);
-  const genres: Genres = line[8].split(',');
+function indexLine(lineData: string[]): void {
+  const line: Line = {
+    id: lineData[0],
+    primaryTitle: lineData[2],
+    originalTitle: lineData[3],
+    year: parseInt(lineData[5], 10),
+    genres: lineData[8].split(','),
+  };
 
-  indexedLines.push([ primaryTitle, originalTitle, year, genres ]);
+  indexedLines.push(line);
 }

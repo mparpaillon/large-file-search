@@ -1,0 +1,55 @@
+<h1 mat-dialog-title>{{ data.line.originalTitle }}</h1>
+
+<div mat-dialog-content>
+  <form [formGroup]="editForm">
+    <mat-form-field class="editForm-field" appearance="outline">
+      <mat-label>Title</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="title"
+        placeholder="Chinese Opium Den"
+      >
+    </mat-form-field>
+
+    <mat-form-field class="editForm-field" appearance="outline">
+      <mat-label>Year</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="year"
+        pattern="\d{4}"
+        placeholder="1894"
+      >
+    </mat-form-field>
+
+    <mat-form-field class="editForm-field" appearance="outline">
+      <mat-label>Genres</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="genres"
+        placeholder="Animation,Short,Documentary"
+      >
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button
+    mat-button
+    color="accent"
+    (click)="cancel()"
+  >
+    Cancel
+  </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    cdkFocusInitial
+  >
+    Save changes
+  </button>
+</div>

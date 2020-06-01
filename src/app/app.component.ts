@@ -1,7 +1,10 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
+import { EditFormComponent, EditFormSubmitData } from 'src/app/edit-form/edit-form.component';
 import { Line } from 'src/app/line.type';
 
 enum FileState {
@@ -29,6 +32,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private cd: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
     private formBuilder: FormBuilder
   ) {
     this.searchForm = this.formBuilder.group({
@@ -42,6 +47,8 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.filteredLines.data = [];
     this.filteredLines.paginator = this.paginator;
+
+    this.snackBar.open('Indexing... You\'ll be able to filter the list once all the file is parsed.');
   }
 
   generateIndex(): void {
@@ -53,9 +60,15 @@ export class AppComponent implements OnInit {
     worker.onmessage = ({ data }) => {
       if (data === 'file-not-found') {
         this.fileState = FileState.NOT_FOUND;
+        this.snackBar.open('Error: The file was not found.', '', {
+          duration: 3000
+        });
       } else if (data.timeToIndex) {
         this.fileState = FileState.LOADED;
         this.timeToIndex = Math.round(data.timeToIndex / 1000);
+        this.snackBar.open(`Done ! Indexing ${this.indexedLines.length} lines took ${this.timeToIndex} second(s).`, '', {
+          duration: 3000
+        });
       } else {
         this.indexedLines.push(...data.indexedLines);
         this.filteredLines.data = this.indexedLines;
@@ -65,7 +78,7 @@ export class AppComponent implements OnInit {
     };
   }
 
-  resetSearch() {
+  resetSearch(): void {
     this.searchForm.reset();
   }
 
@@ -75,11 +88,11 @@ export class AppComponent implements OnInit {
     }
 
     return lines.filter(line => {
-      if (title && !line[0].includes(title) && !line[1].includes(title)) {
+      if (title && !line.primaryTitle.includes(title) && !line.originalTitle.includes(title)) {
         return false;
       }
 
-      if (year && line[2] !== year) {
+      if (year && line.year !== year) {
         return false;
       }
 
@@ -87,8 +100,34 @@ export class AppComponent implements OnInit {
     });
   }
 
-  onSubmit(searchData: { title: string, year: number }): void {
-    const { title, year } = searchData;
+  openDialog(line: Line): void {
+    const dialogRef = this.dialog.open(EditFormComponent, {
+      width: '400px',
+      data: { line }
+    });
+
+    dialogRef.afterClosed().subscribe((formData: EditFormSubmitData) => {
+      if (!formData) return;
+
+      // At first I was using the line index from Material table but it wouldn't work if the list was filtered
+      // Using the actual id is more reliable
+      const lineIndex = this.indexedLines.findIndex(l => l.id === formData.id);
+
+      this.indexedLines[lineIndex].originalTitle = formData.value.title;
+      this.indexedLines[lineIndex].year = formData.value.year;
+
+      this.indexedLines[lineIndex].genres = typeof formData.value.genres === 'string'
+        ? formData.value.genres === '' ? [] : formData.value.genres.split(',')
+        : formData.value.genres;
+
+      this.refreshSearchResults();
+    });
+  }
+
+  refreshSearchResults() {
+    const title = this.searchForm.get('title').value;
+    const year = this.searchForm.get('year').value;
+
     this.filteredLines.data = this.filterLines(this.indexedLines, title, year);
   }
 }

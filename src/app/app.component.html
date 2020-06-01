@@ -8,11 +8,7 @@
 </mat-toolbar>
 
 <div class="content">
-  <mat-hint *ngIf="fileState !== FileState.LOADED" class="hint">
-    You'll be able to submit the form once all the data are indexed.
-  </mat-hint>
-
-  <form class="search" [formGroup]="searchForm" (ngSubmit)="onSubmit(searchForm.value)">
+  <form class="search" [formGroup]="searchForm" (ngSubmit)="refreshSearchResults()">
     <mat-form-field class="search-field" appearance="outline">
       <mat-label>Title</mat-label>
       <input
@@ -47,7 +43,6 @@
     <button
       mat-button
       class="search-button"
-      type="submit"
       color="accent"
       (click)="resetSearch()"
       [disabled]="fileState !== FileState.LOADED"
@@ -72,19 +67,19 @@
     <table mat-table [dataSource]="filteredLines" class="mat-elevation-z8">
       <ng-container matColumnDef="originalTitle">
         <th mat-header-cell *matHeaderCellDef> Original title </th>
-        <td mat-cell *matCellDef="let line"> {{ line[1] }} </td>
+        <td mat-cell *matCellDef="let line"> {{ line.originalTitle }} </td>
       </ng-container>
 
       <ng-container matColumnDef="year">
         <th mat-header-cell *matHeaderCellDef> Start year </th>
-        <td mat-cell *matCellDef="let line"> {{ line[2] }} </td>
+        <td mat-cell *matCellDef="let line"> {{ line.year }} </td>
       </ng-container>
 
       <ng-container matColumnDef="genre">
         <th mat-header-cell *matHeaderCellDef> Genre </th>
         <td mat-cell *matCellDef="let line">
-           <mat-chip-list>
-            <mat-chip *ngFor="let genre of line[3]">{{ genre }}</mat-chip>
+           <mat-chip-list *ngIf="line.genres && line.genres.length > 0">
+            <mat-chip *ngFor="let genre of line.genres">{{ genre }}</mat-chip>
           </mat-chip-list>
         </td>
       </ng-container>
@@ -92,7 +87,7 @@
       <ng-container matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef> Action </th>
         <td mat-cell *matCellDef="let line">
-          <button mat-raised-button color="primary">Edit</button>
+          <button mat-raised-button color="primary" (click)="openDialog(line)">Edit</button>
         </td>
       </ng-container>
 
